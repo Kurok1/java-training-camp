@@ -17,14 +17,10 @@
 package com.acme.biz.web.mvc.config;
 
 import com.acme.biz.web.mvc.method.annotation.ApiResponseHandlerMethodReturnValueHandler;
-import com.acme.biz.web.servlet.mvc.interceptor.ResourceBulkheadHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.util.ArrayList;
@@ -36,6 +32,7 @@ import java.util.List;
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy</a>
  * @since
  */
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Configuration
 public class WebMvcConfiguration {
 

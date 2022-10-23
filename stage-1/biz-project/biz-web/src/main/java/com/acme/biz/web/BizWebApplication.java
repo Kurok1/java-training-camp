@@ -22,8 +22,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -35,7 +33,7 @@ import java.util.List;
 @Import(ResourceBulkheadHandlerInterceptor.class)
 public class BizWebApplication implements WebMvcConfigurer {
 
-    @Autowired
+    @Autowired(required = false)
     private List<HandlerInterceptor> handlerInterceptors;
 
     @Override
