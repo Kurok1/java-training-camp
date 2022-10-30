@@ -34,23 +34,22 @@ import java.io.IOException;
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy</a>
  * @since 1.0.0
  */
-@WebFilter(filterName = "globalCircuitBreakerFilter", urlPatterns = "/*",
-        dispatcherTypes = {
-                DispatcherType.REQUEST
-        })
-@Order(Ordered.HIGHEST_PRECEDENCE)
+//@WebFilter(filterName = "globalCircuitBreakerFilter", urlPatterns = "/*",
+//        dispatcherTypes = {
+//                DispatcherType.REQUEST
+//        })
+//@Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalCircuitBreakerFilter implements Filter {
 
     private CircuitBreaker circuitBreaker;
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
+
+    public GlobalCircuitBreakerFilter(CircuitBreakerRegistry circuitBreakerRegistry) {
+        this.circuitBreakerRegistry = circuitBreakerRegistry;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig
-                .custom()
-                .build();
-
-        CircuitBreakerRegistry circuitBreakerRegistry =
-                CircuitBreakerRegistry.of(circuitBreakerConfig);
 
         String filterName = filterConfig.getFilterName();
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker("CircuitBreaker-" + filterName);

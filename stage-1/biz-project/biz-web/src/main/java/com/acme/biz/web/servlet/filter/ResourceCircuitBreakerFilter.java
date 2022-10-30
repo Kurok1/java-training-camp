@@ -39,11 +39,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy</a>
  * @since 1.0.0
  */
-@WebFilter(filterName = "resourceCircuitBreakerFilter", urlPatterns = "/*",
-        dispatcherTypes = {
-                DispatcherType.REQUEST
-        })
-@Order(Ordered.HIGHEST_PRECEDENCE + 1)
+//@WebFilter(filterName = "resourceCircuitBreakerFilter", urlPatterns = "/*",
+//        dispatcherTypes = {
+//                DispatcherType.REQUEST
+//        })
+//@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class ResourceCircuitBreakerFilter implements Filter {
 
     /**
@@ -53,17 +53,17 @@ public class ResourceCircuitBreakerFilter implements Filter {
 
     private final static Class<?> FILTER_CHAIN_IMPL_CLASS = ClassUtils.resolveClassName(FILTER_CHAIN_IMPL_CLASS_NAME, null);
 
-    private CircuitBreakerRegistry circuitBreakerRegistry;
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
 
     private Map<String, CircuitBreaker> circuitBreakersCache;
 
+    public ResourceCircuitBreakerFilter(CircuitBreakerRegistry circuitBreakerRegistry) {
+        this.circuitBreakerRegistry = circuitBreakerRegistry;
+    }
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig
-                .custom()
-                .build();
 
-        this.circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
         this.circuitBreakersCache = new ConcurrentHashMap<>();
     }
 

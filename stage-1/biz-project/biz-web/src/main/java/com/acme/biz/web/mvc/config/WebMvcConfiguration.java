@@ -17,17 +17,25 @@
 package com.acme.biz.web.mvc.config;
 
 import com.acme.biz.web.mvc.method.annotation.ApiResponseHandlerMethodReturnValueHandler;
+import com.acme.biz.web.servlet.filter.GlobalCircuitBreakerFilter;
+import com.acme.biz.web.servlet.filter.ResourceCircuitBreakerFilter;
 import com.acme.biz.web.servlet.mvc.interceptor.ResourceBulkheadHandlerInterceptor;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.Ordered;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import javax.servlet.DispatcherType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,6 +53,28 @@ public class WebMvcConfiguration {
         List<HandlerMethodReturnValueHandler> newReturnValueHandlers = new ArrayList<>(oldReturnValueHandlers);
         newReturnValueHandlers.add(0, new ApiResponseHandlerMethodReturnValueHandler());
         requestMappingHandlerAdapter.setReturnValueHandlers(newReturnValueHandlers);
+    }
+
+    @Bean
+    public FilterRegistrationBean<GlobalCircuitBreakerFilter> globalCircuitBreakerFilter(CircuitBreakerRegistry circuitBreakerRegistry) {
+        FilterRegistrationBean<GlobalCircuitBreakerFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new GlobalCircuitBreakerFilter(circuitBreakerRegistry));
+        registrationBean.setName("globalCircuitBreakerFilter");
+        registrationBean.setUrlPatterns(Collections.singleton("/*"));
+        registrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ResourceCircuitBreakerFilter> resourceCircuitBreakerFilter(CircuitBreakerRegistry circuitBreakerRegistry) {
+        FilterRegistrationBean<ResourceCircuitBreakerFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new ResourceCircuitBreakerFilter(circuitBreakerRegistry));
+        registrationBean.setName("resourceCircuitBreakerFilter");
+        registrationBean.setUrlPatterns(Collections.singleton("/*"));
+        registrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        return registrationBean;
     }
 
 }
