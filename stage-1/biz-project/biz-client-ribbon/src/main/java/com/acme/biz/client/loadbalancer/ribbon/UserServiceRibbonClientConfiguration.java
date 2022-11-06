@@ -17,10 +17,13 @@
 package com.acme.biz.client.loadbalancer.ribbon;
 
 import com.acme.biz.client.loadbalancer.ribbon.eureka.EurekaDiscoveryEventServerListUpdater;
+import com.acme.biz.client.loadbalancer.ribbon.rule.DefaultUpTimeWeightStrategy;
+import com.acme.biz.client.loadbalancer.ribbon.rule.UpTimeWeightStrategy;
+import com.acme.biz.client.loadbalancer.ribbon.rule.WeightedUpTimeRule;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.loadbalancer.IRule;
 import com.netflix.loadbalancer.ServerListUpdater;
-import com.netflix.loadbalancer.WeightedResponseTimeRule;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.netflix.ribbon.RibbonClientConfiguration;
@@ -37,6 +40,12 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class UserServiceRibbonClientConfiguration {
+
+
+    @Bean
+    public IRule myDefaultRule(ObjectProvider<UpTimeWeightStrategy> strategy) {
+        return new WeightedUpTimeRule(strategy.getIfAvailable(DefaultUpTimeWeightStrategy::new));
+    }
 
     @Bean
     @ConditionalOnClass(EurekaClient.class)
