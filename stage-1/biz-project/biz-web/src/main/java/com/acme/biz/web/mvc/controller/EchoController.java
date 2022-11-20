@@ -20,6 +20,7 @@ import com.acme.biz.api.ApiResponse;
 import com.acme.biz.api.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -38,6 +39,8 @@ public class EchoController {
 
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @PostMapping("/user")
     public ApiResponse<String> echo(@RequestBody User user) {
@@ -51,5 +54,11 @@ public class EchoController {
         user.setName(name);
         ApiResponse response = restTemplate.postForObject(url, user, ApiResponse.class, port);
         return response;
+    }
+
+    @GetMapping("/redis-template/{key}/{value}")
+    public String redisTemplateCall(@PathVariable("key") String key, @PathVariable("value") String value) {
+        this.redisTemplate.opsForValue().set(key, value);
+        return value;
     }
 }

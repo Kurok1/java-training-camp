@@ -1,0 +1,3 @@
+com.acme.biz.api.redis.EnableRedisIntercepting=\
+com.acme.biz.api.micrometer.binder.redis.counter.RedisSetCounterMetrics,\
+com.acme.biz.api.micrometer.binder.redis.timer.RedisSetTimerMetrics

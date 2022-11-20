@@ -18,6 +18,7 @@ package com.acme.biz.web;
 
 import com.acme.biz.api.i18n.PropertySourceMessageSource;
 import com.acme.biz.api.micrometer.binder.servo.ServoMetrics;
+import com.acme.biz.api.redis.EnableRedisIntercepting;
 import com.acme.biz.web.i18n.LocalValidatorFactoryBeanPostProcessor;
 import com.acme.biz.web.servlet.mvc.interceptor.ResourceBulkheadHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ import static org.springframework.context.support.AbstractApplicationContext.MES
 })
 @EnableDiscoveryClient // 激活服务发现客户端
 @EnableScheduling
+@EnableRedisIntercepting
 public class BizWebApplication implements WebMvcConfigurer {
 
     @Autowired
