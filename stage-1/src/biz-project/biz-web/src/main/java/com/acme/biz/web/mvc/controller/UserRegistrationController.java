@@ -18,6 +18,7 @@ package com.acme.biz.web.mvc.controller;
 
 import com.acme.biz.api.interfaces.UserRegistrationService;
 import com.acme.biz.api.model.User;
+import com.acme.biz.web.interceptor.LoggingInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +37,7 @@ public class UserRegistrationController implements UserRegistrationService {
 
     @Override
     @ResponseBody
+    @LoggingInterceptor.Log
     public Boolean registerUser(User user) {
         return userRegistrationService.registerUser(user);
     }

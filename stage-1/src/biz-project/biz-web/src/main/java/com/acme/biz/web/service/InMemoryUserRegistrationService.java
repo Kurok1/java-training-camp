@@ -19,6 +19,7 @@ package com.acme.biz.web.service;
 import com.acme.biz.api.exception.UserException;
 import com.acme.biz.api.interfaces.UserRegistrationService;
 import com.acme.biz.api.model.User;
+import com.acme.biz.web.interceptor.LoggingInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +48,16 @@ public class InMemoryUserRegistrationService implements UserRegistrationService 
 
     private Map<Long, User> usersCache = new ConcurrentHashMap<>();
 
-    @Autowired
-    private Tracer tracer;
+    private final Tracer tracer;
+
+    public InMemoryUserRegistrationService(Tracer tracer) {
+        this.tracer = tracer;
+    }
 
     @Autowired
     private CurrentTraceContext currentTraceContext;
 
+    @LoggingInterceptor.Log
     @Override
     public Boolean registerUser(User user) throws UserException {
         Long id = user.getId();
