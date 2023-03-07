@@ -97,6 +97,11 @@ public class CounterServiceImpl implements CounterService {
         applyOperation(CounterOperation.createIncrement(delta), closure);
     }
 
+    @Override
+    public void decrementAndGet(long delta, CounterClosure closure) {
+        applyOperation(CounterOperation.createDecrement(delta), closure);
+    }
+
     private void applyOperation(final CounterOperation op, final CounterClosure closure) {
         if (!isLeader()) {
             handlerNotLeaderError(closure);

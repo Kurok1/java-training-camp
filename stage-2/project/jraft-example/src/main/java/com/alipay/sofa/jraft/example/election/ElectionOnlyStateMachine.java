@@ -16,15 +16,16 @@
  */
 package com.alipay.sofa.jraft.example.election;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
+import com.alipay.sofa.jraft.entity.LeaderChangeContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
@@ -35,10 +36,12 @@ public class ElectionOnlyStateMachine extends StateMachineAdapter {
     private static final Logger             LOG        = LoggerFactory.getLogger(ElectionOnlyStateMachine.class);
 
     private final AtomicLong                leaderTerm = new AtomicLong(-1L);
-    private final List<LeaderStateListener> listeners;
+    private final List<LeaderStateListener> leaderStateListeners;
+    private final List<FollowerStateListener> followerStateListeners;
 
-    public ElectionOnlyStateMachine(List<LeaderStateListener> listeners) {
-        this.listeners = listeners;
+    public ElectionOnlyStateMachine(List<LeaderStateListener> leaderStateListeners, List<FollowerStateListener> followerStateListeners) {
+        this.leaderStateListeners = Collections.unmodifiableList(leaderStateListeners);
+        this.followerStateListeners = Collections.unmodifiableList(followerStateListeners);
     }
 
     @Override
@@ -54,7 +57,7 @@ public class ElectionOnlyStateMachine extends StateMachineAdapter {
     public void onLeaderStart(final long term) {
         super.onLeaderStart(term);
         this.leaderTerm.set(term);
-        for (final LeaderStateListener listener : this.listeners) { // iterator the snapshot
+        for (final LeaderStateListener listener : this.leaderStateListeners) { // iterator the snapshot
             listener.onLeaderStart(term);
         }
     }
@@ -64,16 +67,26 @@ public class ElectionOnlyStateMachine extends StateMachineAdapter {
         super.onLeaderStop(status);
         final long oldTerm = leaderTerm.get();
         this.leaderTerm.set(-1L);
-        for (final LeaderStateListener listener : this.listeners) { // iterator the snapshot
+        for (final LeaderStateListener listener : this.leaderStateListeners) { // iterator the snapshot
             listener.onLeaderStop(oldTerm);
         }
     }
 
-    public boolean isLeader() {
-        return this.leaderTerm.get() > 0;
+    @Override
+    public void onStopFollowing(LeaderChangeContext ctx) {
+        super.onStopFollowing(ctx);
+        for (FollowerStateListener listener : this.followerStateListeners)
+            listener.onStartFollowing(ctx);
     }
 
-    public void addLeaderStateListener(final LeaderStateListener listener) {
-        this.listeners.add(listener);
+    @Override
+    public void onStartFollowing(LeaderChangeContext ctx) {
+        super.onStartFollowing(ctx);
+        for (FollowerStateListener listener : this.followerStateListeners)
+            listener.onStartFollowing(ctx);
+    }
+
+    public boolean isLeader() {
+        return this.leaderTerm.get() > 0;
     }
 }

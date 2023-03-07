@@ -21,6 +21,7 @@ import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.example.counter.rpc.CounterOutter.ValueResponse;
+import com.alipay.sofa.jraft.example.counter.rpc.DecrementAndGetRequestProcessor;
 import com.alipay.sofa.jraft.example.counter.rpc.GetValueRequestProcessor;
 import com.alipay.sofa.jraft.example.counter.rpc.CounterGrpcHelper;
 import com.alipay.sofa.jraft.example.counter.rpc.IncrementAndGetRequestProcessor;
@@ -60,6 +61,7 @@ public class CounterServer {
         CounterService counterService = new CounterServiceImpl(this);
         rpcServer.registerProcessor(new GetValueRequestProcessor(counterService));
         rpcServer.registerProcessor(new IncrementAndGetRequestProcessor(counterService));
+        rpcServer.registerProcessor(new DecrementAndGetRequestProcessor(counterService));
         // init state machine
         this.fsm = new CounterStateMachine();
         // set fsm to nodeOptions

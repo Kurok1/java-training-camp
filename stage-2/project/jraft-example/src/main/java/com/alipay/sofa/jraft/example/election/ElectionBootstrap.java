@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.jraft.example.election;
 
+import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.entity.PeerId;
 
 /**
@@ -60,6 +61,17 @@ public class ElectionBootstrap {
             @Override
             public void onLeaderStop(long leaderTerm) {
                 System.out.println("[ElectionBootstrap] Leader stop on term: " + leaderTerm);
+            }
+        });
+        node.addFollowerStateListener(new FollowerStateListener() {
+            @Override
+            public void onStartFollowing(LeaderChangeContext context) {
+                System.out.printf("[ElectionBootstrap] start follow leader[peerId=%s, term=%d]", context.getLeaderId().toString(), context.getTerm());
+            }
+
+            @Override
+            public void onStopFollowing(LeaderChangeContext context) {
+                System.out.printf("[ElectionBootstrap] stop follow leader[peerId=%s, term=%d]", context.getLeaderId().toString(), context.getTerm());
             }
         });
         node.init(electionOpts);

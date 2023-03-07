@@ -64,6 +64,9 @@ public class CounterClient {
         for (int i = 0; i < n; i++) {
             incrementAndGet(cliClientService, leader, i, latch);
         }
+        for (int i = 0; i < n; i++) {
+            decrementAndGet(cliClientService, leader, i, latch);
+        }
         latch.await();
         System.out.println(n + " ops, cost : " + (System.currentTimeMillis() - start) + " ms.");
         System.exit(0);
@@ -72,6 +75,30 @@ public class CounterClient {
     private static void incrementAndGet(final CliClientServiceImpl cliClientService, final PeerId leader,
                                         final long delta, CountDownLatch latch) throws RemotingException,
                                                                                InterruptedException {
+        IncrementAndGetRequest request = IncrementAndGetRequest.newBuilder().setDelta(delta).build();
+        cliClientService.getRpcClient().invokeAsync(leader.getEndpoint(), request, new InvokeCallback() {
+
+            @Override
+            public void complete(Object result, Throwable err) {
+                if (err == null) {
+                    latch.countDown();
+                    System.out.println("incrementAndGet result:" + result);
+                } else {
+                    err.printStackTrace();
+                    latch.countDown();
+                }
+            }
+
+            @Override
+            public Executor executor() {
+                return null;
+            }
+        }, 5000);
+    }
+
+    private static void decrementAndGet(final CliClientServiceImpl cliClientService, final PeerId leader,
+                                        final long delta, CountDownLatch latch) throws RemotingException,
+            InterruptedException {
         IncrementAndGetRequest request = IncrementAndGetRequest.newBuilder().setDelta(delta).build();
         cliClientService.getRpcClient().invokeAsync(leader.getEndpoint(), request, new InvokeCallback() {
 

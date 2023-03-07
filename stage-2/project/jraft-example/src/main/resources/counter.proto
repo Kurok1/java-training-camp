@@ -14,6 +14,10 @@ message IncrementAndGetRequest {
   required int64 delta = 1;
 }
 
+message DecrementAndGetRequest {
+  required int64 delta = 1;
+}
+
 message ValueResponse {
   required int64 value = 1;
   required bool success = 2;
