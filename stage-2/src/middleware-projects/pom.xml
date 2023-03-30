@@ -29,10 +29,15 @@
         <mybatis.version>3.5.9</mybatis.version>
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
         <resilience4j.version>1.7.0</resilience4j.version>
+
+        <curator.version>5.4.0</curator.version>
     </properties>
 
     <modules>
         <module>zookeeper-project</module>
+        <module>curator-config</module>
+        <module>curator-config-sample</module>
+        <module>stream-config-server</module>
     </modules>
 
     <dependencyManagement>
