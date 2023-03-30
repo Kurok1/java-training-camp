@@ -15,6 +15,8 @@ public class ZookeeperTextPropertySource extends PropertySource<String> {
 
     @Override
     public Object getProperty(String name) {
-        return super.source;
+        if (name.equals(super.name))
+            return super.source;
+        return null;
     }
 }
