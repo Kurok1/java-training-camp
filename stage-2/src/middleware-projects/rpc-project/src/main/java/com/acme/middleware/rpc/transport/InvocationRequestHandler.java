@@ -19,6 +19,8 @@ package com.acme.middleware.rpc.transport;
 import com.acme.middleware.rpc.InvocationRequest;
 import com.acme.middleware.rpc.InvocationResponse;
 import com.acme.middleware.rpc.context.ServiceContext;
+import com.acme.middleware.rpc.server.RpcInvokeInterceptor;
+import com.acme.middleware.rpc.util.ServiceLoaders;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.commons.lang3.reflect.MethodUtils;
@@ -26,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * {@link InvocationRequest} 处理器
@@ -39,8 +43,11 @@ public class InvocationRequestHandler extends SimpleChannelInboundHandler<Invoca
 
     private final ServiceContext serviceContext;
 
+    private final List<RpcInvokeInterceptor> interceptors;
+
     public InvocationRequestHandler(ServiceContext serviceContext) {
         this.serviceContext = serviceContext;
+        this.interceptors = ServiceLoaders.loadAll(RpcInvokeInterceptor.class);
     }
 
     @Override
@@ -55,6 +62,9 @@ public class InvocationRequestHandler extends SimpleChannelInboundHandler<Invoca
         Object entity = null;
         String errorMessage = null;
         try {
+            for (RpcInvokeInterceptor interceptor : this.interceptors)
+                interceptor.beforeInvoke(service, request);
+
             entity = MethodUtils.invokeMethod(service, methodName, parameters, parameterTypes);
         } catch (Exception e) {
             errorMessage = e.getMessage();
@@ -67,6 +77,13 @@ public class InvocationRequestHandler extends SimpleChannelInboundHandler<Invoca
         response.setRequestId(request.getRequestId());
         response.setEntity(entity);
         response.setErrorMessage(errorMessage);
+
+        try {
+            for (RpcInvokeInterceptor interceptor : this.interceptors)
+                interceptor.afterInvoke(service, request, response);
+        } catch (Exception ex) {
+            logger.error("error happened on afterInvoke", ex);
+        }
 
         ctx.writeAndFlush(response);
 

@@ -47,11 +47,14 @@ public class ServiceInvocationHandler implements InvocationHandler {
 
     private final ServiceInstanceSelector selector;
 
-    public ServiceInvocationHandler(String serviceName, RpcClient rpcClient) {
+    private final List<RequestInterceptor> interceptors;
+
+    public ServiceInvocationHandler(String serviceName, RpcClient rpcClient, List<RequestInterceptor> interceptors) {
         this.serviceName = serviceName;
         this.rpcClient = rpcClient;
         this.serviceRegistry = rpcClient.getServiceRegistry();
         this.selector = rpcClient.getSelector();
+        this.interceptors = interceptors;
     }
 
     @Override
@@ -61,15 +64,42 @@ public class ServiceInvocationHandler implements InvocationHandler {
             return handleObjectMethod(proxy, method, args);
         }
 
-        // 非 Object 方法实行远程调用
-        InvocationRequest request = createRequest(method, args);
-
-        return execute(request, proxy);
-    }
-
-    private Object execute(InvocationRequest request, Object proxy) {
         // 在 RPC 服务集群中选择其中一个实例（负载均衡）
         ServiceInstance serviceInstance = selectServiceProviderInstance();
+
+        // 非 Object 方法实行远程调用
+        InvocationRequest request = createRequest(method, args);
+        Object result = null;
+        for (RequestInterceptor interceptor : this.interceptors) {
+            if (!interceptor.support(method, serviceInstance, serviceName, request))
+                continue;
+
+            if (!interceptor.beforeExecute(method, serviceInstance, request)) {
+                triggerComplete(method, serviceInstance, request, result, null);
+                return result;
+            }
+        }
+        try {
+            result = execute(request, serviceInstance, proxy);
+            triggerComplete(method, serviceInstance, request, result, null);
+        } catch (Exception ex) {
+            triggerComplete(method, serviceInstance, request, result, ex);
+        }
+        return result;
+    }
+
+    private void triggerComplete(Method method, ServiceInstance serviceInstance, InvocationRequest request, Object result, Exception ex) {
+        for (RequestInterceptor interceptor : this.interceptors) {
+            try {
+                interceptor.afterExecute(method, serviceInstance, request, result, ex);
+            } catch (Exception ignored) {
+                //todo 异常日志记录
+            }
+        }
+
+    }
+
+    private Object execute(InvocationRequest request, ServiceInstance serviceInstance, Object proxy) {
         // 与目标 RPC 服务器建联
         ChannelFuture channelFuture = rpcClient.connect(serviceInstance);
         // 发送请求（消息），关联 requestId

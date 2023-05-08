@@ -22,6 +22,7 @@ import com.acme.middleware.rpc.loadbalancer.ServiceInstanceSelector;
 import com.acme.middleware.rpc.service.ServiceInstance;
 import com.acme.middleware.rpc.service.registry.ServiceRegistry;
 import com.acme.middleware.rpc.transport.InvocationResponseHandler;
+import com.acme.middleware.rpc.util.ServiceLoaders;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
@@ -33,6 +34,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 /**
  * 客户端引导程序
@@ -49,6 +51,8 @@ public class RpcClient implements AutoCloseable {
     private final Bootstrap bootstrap;
 
     private final EventLoopGroup group;
+
+    private final List<RequestInterceptor> interceptors;
 
     public RpcClient(ServiceRegistry serviceRegistry, ServiceInstanceSelector selector) {
         this.serviceRegistry = serviceRegistry;
@@ -68,6 +72,7 @@ public class RpcClient implements AutoCloseable {
                         ch.pipeline().addLast("response-handler", new InvocationResponseHandler());
                     }
                 });
+        this.interceptors = ServiceLoaders.loadAll(RequestInterceptor.class);
     }
 
     public RpcClient() {
@@ -77,7 +82,7 @@ public class RpcClient implements AutoCloseable {
     public <T> T getService(String serviceName, Class<T> serviceInterfaceClass) {
         ClassLoader classLoader = serviceInterfaceClass.getClassLoader();
         return (T) Proxy.newProxyInstance(classLoader, new Class[]{serviceInterfaceClass},
-                new ServiceInvocationHandler(serviceName, this));
+                new ServiceInvocationHandler(serviceName, this, interceptors));
     }
 
     public ChannelFuture connect(ServiceInstance serviceInstance) {

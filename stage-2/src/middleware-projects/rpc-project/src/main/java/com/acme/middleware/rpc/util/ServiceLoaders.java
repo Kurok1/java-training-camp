@@ -16,7 +16,8 @@
  */
 package com.acme.middleware.rpc.util;
 
-import java.util.ServiceLoader;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link ServiceLoader} 工具类
@@ -26,7 +27,29 @@ import java.util.ServiceLoader;
  */
 public abstract class ServiceLoaders {
 
+    private static final Map<String, List<?>> loadedServices = new ConcurrentHashMap<>();
+
     public static <T> T loadDefault(Class<T> serviceClass) {
         return ServiceLoader.load(serviceClass).iterator().next();
+    }
+
+    public static <T> List<T> loadAll(Class<T> serviceClass) {
+        synchronized (loadedServices) {
+            if (loadedServices.containsKey(serviceClass.getName()))
+                return (List<T>) loadedServices.get(serviceClass.getName());
+        }
+
+        Iterator<T> serviceLoader = ServiceLoader.load(serviceClass).iterator();
+        if (!serviceLoader.hasNext())
+            return Collections.emptyList();
+
+        List<T> services = new ArrayList<>();
+        while (serviceLoader.hasNext())
+            services.add(serviceLoader.next());
+
+        synchronized (loadedServices) {
+            loadedServices.put(serviceClass.getName(), services);
+        }
+        return services;
     }
 }
