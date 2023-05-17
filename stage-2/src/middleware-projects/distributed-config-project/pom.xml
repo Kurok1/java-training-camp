@@ -16,6 +16,8 @@
     <modules>
         <module>distributed-config-client</module>
         <module>distributed-config-server</module>
+        <module>distributed-config-common</module>
+        <module>distributed-config-sample</module>
     </modules>
 
 </project>
