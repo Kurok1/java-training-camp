@@ -1,0 +1,7 @@
+spring:
+    redis:
+        port: 6379
+        host: localhost
+        database: 1
+    main:
+        web-application-type: none # standard application
