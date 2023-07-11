@@ -1,0 +1,26 @@
+spring:
+    application:
+        name: eureka-server
+
+
+
+# Eureka 客户端连接配置
+eureka:
+    client:
+        service-url:
+            # Register self
+            defaultZone: http://127.0.0.1:${server.port}/eureka
+        # Do not fetch itself
+        fetch-registry: false
+
+management:
+    endpoints:
+        enabled-by-default: true
+        web:
+            exposure:
+                include: '*'
+
+    endpoint:
+        health:
+            show-details: always
+            show-components: always

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.6.9</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.acme</groupId>
+	<artifactId>eureka-server</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>eureka-server</name>
+	<description>eureka-server for Spring Boot</description>
+	<properties>
+		<java.version>11</java.version>
+		<spring-cloud.version>2021.0.5</spring-cloud.version>
+	</properties>
+	<dependencies>
+		<dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+    <profiles>
+        <profile>
+            <id>spring-boot</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </dependency>
+                <!-- Apache Tomcat -->
+                <dependency>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-tribes</artifactId>
+                    <version>${tomcat.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat-juli</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-catalina-ha</artifactId>
+                    <version>${tomcat.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat-tribes</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat-coyote</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat-catalina</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat-servlet-api</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat-juli</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat-util</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat-util-scan</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>tomcat</id>
+            <properties>
+                <packaging>war</packaging>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-tribes</artifactId>
+                    <version>${tomcat.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-catalina-ha</artifactId>
+                    <version>${tomcat.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>jgroup</id>
+            <dependencies>
+                <!-- https://mvnrepository.com/artifact/org.jgroups/jgroups -->
+                <dependency>
+                    <groupId>org.jgroups</groupId>
+                    <artifactId>jgroups</artifactId>
+                    <version>5.2.16.Final</version>
+                </dependency>
+            </dependencies>
+
+        </profile>
+    </profiles>
+
+</project>
